@@ -1,0 +1,12 @@
+# Ignorar la carpeta de datos por privacidad y peso
+datos/
+
+# Ignorar archivos temporales de Mac
+.DS_Store
+
+# Ignorar entornos virtuales de Python (si decides usar uno luego)
+.venv/
+venv/
+__pycache__/
+*.pyc
+
