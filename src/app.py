@@ -9,7 +9,7 @@ st.set_page_config(page_title="Conciliador de Pagos", page_icon="📊", layout="
 
 st.title("📊 Sistema de Conciliación de Pagos")
 st.write("Automatiza el cruce de datos entre tus liquidaciones de Financiera y tu Excel del Local.")
-st.write("El sistema mantendrá el formato de tu Local, analizando estrictamente la columna B para la Financiera.")
+st.write("El sistema mantendrá el formato de tu Local, analizando strictly la columna B para la Financiera y la Columna L para matches previos.")
 
 # Definición de las columnas requeridas para la Financiera (en minúsculas)
 columnas_financiera_req = ['producto', 'número de autorización', 'importe de transacción']
@@ -31,10 +31,10 @@ def homologar_marca_inicial(texto):
 col1, col2 = st.columns(2)
 
 with col1:
-    excel_pdf_subido = st.file_uploader("Sube el Excel de la Financiera", type=["xlsx"])
+    excel_casero_subido = st.file_uploader("Sube tu Excel del Local", type=["xlsx"])
 
 with col2:
-    excel_casero_subido = st.file_uploader("Sube tu Excel del Local", type=["xlsx"])
+    excel_pdf_subido = st.file_uploader("Sube el Excel de la Financiera", type=["xlsx"])
     
 if excel_pdf_subido is not None and excel_casero_subido is not None:
     st.success("¡Ambos archivos cargados! Listo para iniciar el cruce.")
@@ -67,11 +67,15 @@ if excel_pdf_subido is not None and excel_casero_subido is not None:
                     idx_aut = columnas_local_min.index('aut')
                     idx_importe = columnas_local_min.index('importe')
                     
-                    # Extraemos de forma limpia aislando los datos por su posición matemática (evita duplicados de etiquetas)
+                    # Verificar si existe la Columna L (Índice 11 en Pandas) en el Excel cargado
+                    tiene_columna_l = df_casero_limpio.shape[1] > 11
+
+                    # Extraemos los datos del local aislando posiciones
                     df_match_local = pd.DataFrame({
                         'financiera': df_casero_limpio.iloc[:, posicion_columna_b],
                         'aut': df_casero_limpio.iloc[:, idx_aut],
                         'importe': df_casero_limpio.iloc[:, idx_importe],
+                        'match_previo': df_casero_limpio.iloc[:, 11].astype(str).str.strip().str.lower() if tiene_columna_l else '',
                         '_id_fila': df_casero_limpio['_id_fila']
                     })
                     verificacion_local = True
@@ -97,26 +101,30 @@ if excel_pdf_subido is not None and excel_casero_subido is not None:
                     # Identificar qué financieras están presentes en este Excel de la tarjeta para evaluar solo esas
                     financieras_en_tarjeta = set(df_pdf_limpio['producto'].dropna().unique())
                     
+                    # 🔄 FILTRAR REGISTROS DEL LOCAL QUE YA HICIERON MATCH EN ITERACIONES ANTERIORES (Columna L == 'm')
+                    df_match_local_para_cruce = df_match_local[df_match_local['match_previo'] != 'm'].copy()
+
                     # MARCAR COINCIDENCIAS (Agregamos columnas temporales de control)
                     df_pdf_limpio["_existe_en_pdf"] = True
-                    df_match_local["_existe_en_local"] = True
+                    df_match_local_para_cruce["_existe_en_local"] = True
 
-                    # Hacemos un merge completo (outer) para identificar qué sobra en cada lado
+                    # Hacemos un merge completo (outer) omitiendo los registros que ya tenían match previo
                     resultado_cruce = pd.merge(
-                        df_match_local[['financiera', 'aut', 'importe', '_id_fila', '_existe_en_local']],
+                        df_match_local_para_cruce[['financiera', 'aut', 'importe', '_id_fila', '_existe_en_local']],
                         df_pdf_limpio[columnas_financiera_req + ["_existe_en_pdf"]],
                         left_on=["financiera", "aut", "importe"],
                         right_on=["producto", "número de autorización", "importe de transacción"],
                         how="outer",
                     )
 
-                    # Identificar cuáles IDs del local hicieron match
+                    # Identificar cuáles IDs del local hicieron match en ESTA iteración
                     ids_con_match = set(
                         resultado_cruce[
                             (resultado_cruce["_existe_en_local"] == True)
                             & (resultado_cruce["_existe_en_pdf"] == True)
                         ]["_id_fila"]
                     )
+                    
                     # Identificar cuáles IDs del local NO tienen coincidencia Y ADEMÁS corresponden a la tarjeta evaluada
                     ids_sin_match_filtrados = set(
                         resultado_cruce[
@@ -147,7 +155,7 @@ if excel_pdf_subido is not None and excel_casero_subido is not None:
                     st.divider()
                     metric_col1, metric_col2, metric_col3 = st.columns(3)
                     with metric_col1:
-                        st.metric("Ventas Conciliadas (Correctas)", total_matches)
+                        st.metric("Ventas Conciliadas (Verdes + 'm')", total_matches)
                     with metric_col2:
                         st.metric("Ventas Local sin coincidencia (Rojas)", sin_pago_local)
                     with metric_col3:
@@ -159,10 +167,18 @@ if excel_pdf_subido is not None and excel_casero_subido is not None:
                     wb_local = load_workbook(excel_casero_subido)
                     ws_local = wb_local.active 
 
-                    # Definimos el color rojo pastel suave (Hex: FFCCCC)
+                    # Definimos los colores pastel suaves
                     relleno_rojo = PatternFill(start_color="FFCCCC", end_color="FFCCCC", fill_type="solid")
+                    relleno_match = PatternFill(start_color="C5D9F1", end_color="C5D9F1", fill_type="solid")
 
-                    # Pintamos de rojo SOLO hasta la columna D (A, B, C, D) para las filas filtradas
+                    # 1. Marcar con 'm' en la Columna L (Columna 12 en openpyxl) y pintar de VERDE celdas A:D para los nuevos MATCHES
+                    for fila_idx in ids_con_match:
+                        fila_excel = fila_idx + 2
+                        ws_local.cell(row=fila_excel, column=12, value="m")
+                        for col_idx in range(1, 5):  
+                            ws_local.cell(row=fila_excel, column=col_idx).fill = relleno_match
+
+                    # 2. Pintar de ROJO SOLO hasta la columna D (A, B, C, D) para las filas pendientes de esta financiera
                     for fila_idx in ids_sin_match_filtrados:
                         fila_excel = fila_idx + 2
                         for col_idx in range(1, 5):  
@@ -185,12 +201,12 @@ if excel_pdf_subido is not None and excel_casero_subido is not None:
                     down_col1, down_col2 = st.columns(2)
                     with down_col1:
                         st.download_button(
-                            label="📥 Descargar tu Excel del Local (Con Alertas Rojas)",
+                            label="📥 Descargar tu Excel del Local (Actualizado)",
                             data=datos_local_final,
                             file_name="local_conciliado_alertas.xlsx",
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         )
-                        st.caption("Conserva la estructura original de tu Local, forzando la comparación con la columna B.")
+                        st.caption("Añade 'm' en la Columna L y pinta de verde (coincidencias) o rojo (pendientes) las columnas A-D.")
 
                     with down_col2:
                         st.download_button(
