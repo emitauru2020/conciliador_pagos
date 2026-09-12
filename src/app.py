@@ -1,5 +1,6 @@
 import io
 import pandas as pd
+from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 import streamlit as st
 
@@ -8,11 +9,21 @@ st.set_page_config(page_title="Conciliador de Pagos", page_icon="📊", layout="
 
 st.title("📊 Sistema de Conciliación de Pagos")
 st.write("Automatiza el cruce de datos entre tus liquidaciones de Financiera y tu Excel del Local.")
-st.write("El sistema mantendrá el formato de tu Local, agrupará las filas verdes arriba y añadirá una pestaña con lo pendiente de la Financiera.")
+st.write("El sistema mantendrá el formato de tu Local, analizando estrictamente la columna B para la Financiera.")
 
-# Definición de las columnas requeridas (estrictamente en minúsculas para el procesamiento interno)
-columnas_local_req = ['financiera', 'aut', 'importe']
+# Definición de las columnas requeridas para la Financiera (en minúsculas)
 columnas_financiera_req = ['producto', 'número de autorización', 'importe de transacción']
+
+# Función optimizada para homologar marcas basándose en cómo empiezan las palabras
+def homologar_marca_inicial(texto):
+    texto_min = str(texto).strip().lower()
+    if texto_min.startswith('visa'):
+        return 'VISA'
+    elif texto_min.startswith('master'):
+        return 'MASTER'
+    elif texto_min.startswith('oca'):
+        return 'OCA'
+    return texto_min.upper()
 
 # ==========================================
 # SECCIÓN DE CARGA DE ARCHIVOS Y CONCILIACIÓN
@@ -29,7 +40,7 @@ if excel_pdf_subido is not None and excel_casero_subido is not None:
     st.success("¡Ambos archivos cargados! Listo para iniciar el cruce.")
     
     if st.button("Ejecutar Conciliación 🚀"):
-        with st.spinner("Buscando coincidencias exactas y ordenando filas..."):
+        with st.spinner("Buscando coincidencias exactas..."):
             try:
                 # Leer los archivos cargados
                 df_del_pdf = pd.read_excel(excel_pdf_subido)
@@ -39,57 +50,63 @@ if excel_pdf_subido is not None and excel_casero_subido is not None:
                 df_pdf_limpio = df_del_pdf.copy()
                 df_casero_limpio = df_casero_original.copy()
                 
-                # Agregar ID de fila único para rastrear la posición original antes de limpiar headers
+                # Agregar ID de fila único para rastrear la posición original antes de cualquier limpieza
                 df_casero_limpio['_id_fila'] = range(len(df_casero_limpio))
                 
-                # INMUNIDAD DE MAYÚSCULAS/MINÚSCULAS EN LOS ENCABEZADOS:
-                df_casero_limpio.columns = df_casero_limpio.columns.astype(str).str.strip().str.lower()
+                # INMUNIDAD DE MAYÚSCULAS/MINÚSCULAS EN LOS ENCABEZADOS DE LA FINANCIERA:
                 df_pdf_limpio.columns = df_pdf_limpio.columns.astype(str).str.strip().str.lower()
                 
-                # Verificar que existan las columnas correspondientes en cada archivo antes de procesar
-                verificacion_local = all(col in df_casero_limpio.columns for col in columnas_local_req)
+                # Convertimos temporalmente a minúsculas los nombres de las columnas del local para mapear posiciones
+                columnas_local_min = [str(c).strip().lower() for c in df_casero_limpio.columns]
+                
+                # 🎯 REQUERIMIENTO STRICT: Forzar columna B (Índice 1 en Pandas) como la Financiera del Local
+                posicion_columna_b = 1 
+                
+                # Validar la existencia de las columnas obligatorias 'aut' e 'importe' en el Local
+                if 'aut' in columnas_local_min and 'importe' in columnas_local_min:
+                    idx_aut = columnas_local_min.index('aut')
+                    idx_importe = columnas_local_min.index('importe')
+                    
+                    # Extraemos de forma limpia aislando los datos por su posición matemática (evita duplicados de etiquetas)
+                    df_match_local = pd.DataFrame({
+                        'financiera': df_casero_limpio.iloc[:, posicion_columna_b],
+                        'aut': df_casero_limpio.iloc[:, idx_aut],
+                        'importe': df_casero_limpio.iloc[:, idx_importe],
+                        '_id_fila': df_casero_limpio['_id_fila']
+                    })
+                    verificacion_local = True
+                else:
+                    verificacion_local = False
+                
                 verificacion_financiera = all(col in df_pdf_limpio.columns for col in columnas_financiera_req)
                 
                 if verificacion_local and verificacion_financiera:
                     
-                    # 🛠️ 1. MAPEO Y HOMOLOGACIÓN DE "FINANCIERA" EN EL EXCEL DEL LOCAL
-                    df_casero_limpio['financiera'] = df_casero_limpio['financiera'].astype(str).str.strip().str.lower()
-                    
-                    diccionario_homologacion = {
-                        'visa pos': 'VISA',
-                        'master pos': 'MASTER',
-                        'oca pos': 'OCA'
-                    }
-                    df_casero_limpio['financiera'] = df_casero_limpio['financiera'].map(diccionario_homologacion).fillna(df_casero_limpio['financiera'].str.upper())
+                    # 🛠️ 1. MAPEO Y HOMOLOGACIÓN DE "FINANCIERA" BASADO EXCLUSIVAMENTE EN LA COLUMNA B
+                    df_match_local['financiera'] = df_match_local['financiera'].apply(homologar_marca_inicial)
                     
                     # 🛠️ 2. LIMPIEZA GENERAL DE DATOS (Columnas del Local)
-                    df_casero_limpio['financiera'] = df_casero_limpio['financiera'].astype(str).str.strip().str.upper()
-                    df_casero_limpio['aut'] = df_casero_limpio['aut'].astype(str).str.strip().str.replace(r'\.0$', '', regex=True)
-                    df_casero_limpio['importe'] = pd.to_numeric(df_casero_limpio['importe'], errors='coerce')
+                    df_match_local['aut'] = df_match_local['aut'].astype(str).str.strip().str.replace(r'\.0$', '', regex=True)
+                    df_match_local['importe'] = pd.to_numeric(df_match_local['importe'], errors='coerce')
                     
                     # 🛠️ 3. LIMPIEZA GENERAL DE DATOS (Columnas de la Financiera)
-                    df_pdf_limpio['producto'] = df_pdf_limpio['producto'].astype(str).str.strip().str.upper()
+                    df_pdf_limpio['producto'] = df_pdf_limpio['producto'].apply(homologar_marca_inicial)
                     df_pdf_limpio['número de autorización'] = df_pdf_limpio['número de autorización'].astype(str).str.strip().str.replace(r'\.0$', '', regex=True)
                     df_pdf_limpio['importe de transacción'] = pd.to_numeric(df_pdf_limpio['importe de transacción'], errors='coerce')
+                    
+                    # Identificar qué financieras están presentes en este Excel de la tarjeta para evaluar solo esas
+                    financieras_en_tarjeta = set(df_pdf_limpio['producto'].dropna().unique())
+                    
                     # MARCAR COINCIDENCIAS (Agregamos columnas temporales de control)
                     df_pdf_limpio["_existe_en_pdf"] = True
-                    df_casero_limpio["_existe_en_local"] = True
+                    df_match_local["_existe_en_local"] = True
 
                     # Hacemos un merge completo (outer) para identificar qué sobra en cada lado
                     resultado_cruce = pd.merge(
-                        df_casero_limpio[
-                            columnas_local_req
-                            + ["_id_fila", "_existe_en_local"]
-                        ],
-                        df_pdf_limpio[
-                            columnas_financiera_req + ["_existe_en_pdf"]
-                        ],
+                        df_match_local[['financiera', 'aut', 'importe', '_id_fila', '_existe_en_local']],
+                        df_pdf_limpio[columnas_financiera_req + ["_existe_en_pdf"]],
                         left_on=["financiera", "aut", "importe"],
-                        right_on=[
-                            "producto",
-                            "número de autorización",
-                            "importe de transacción",
-                        ],
+                        right_on=["producto", "número de autorización", "importe de transacción"],
                         how="outer",
                     )
 
@@ -100,18 +117,13 @@ if excel_pdf_subido is not None and excel_casero_subido is not None:
                             & (resultado_cruce["_existe_en_pdf"] == True)
                         ]["_id_fila"]
                     )
-
-                    # 🚀 CORRECCIÓN: Usamos un nombre sin guion bajo al inicio para evitar restricciones de Pandas
-                    df_casero_original["coincide_match"] = range(
-                        len(df_casero_original)
-                    )
-                    df_casero_original["coincide_match"] = df_casero_original[
-                        "coincide_match"
-                    ].isin(ids_con_match)
-
-                    # Ordenar para que True (match) quede arriba y False (no match) quede abajo
-                    df_casero_ordenado = df_casero_original.sort_values(
-                        by="coincide_match", ascending=False
+                    # Identificar cuáles IDs del local NO tienen coincidencia Y ADEMÁS corresponden a la tarjeta evaluada
+                    ids_sin_match_filtrados = set(
+                        resultado_cruce[
+                            (resultado_cruce["_existe_en_local"] == True) & 
+                            (resultado_cruce["_existe_en_pdf"].isna()) &
+                            (resultado_cruce["financiera"].isin(financieras_en_tarjeta))
+                        ]["_id_fila"]
                     )
 
                     # Extraer las filas de la FINANCIERA que no tuvieron contraparte en el local
@@ -122,98 +134,76 @@ if excel_pdf_subido is not None and excel_casero_subido is not None:
 
                     # Armamos el DataFrame limpio con los sobrantes de la financiera para exportar
                     df_financiera_no_match = pd.DataFrame()
-                    df_financiera_no_match["Producto"] = (
-                        df_financiera_no_match_limpio["producto"]
-                    )
-                    df_financiera_no_match["Número de Autorización"] = (
-                        df_financiera_no_match_limpio["número de autorización"]
-                    )
-                    df_financiera_no_match["Importe de Transacción"] = (
-                        df_financiera_no_match_limpio["importe de transacción"]
-                    )
+                    df_financiera_no_match["Producto"] = df_financiera_no_match_limpio["producto"]
+                    df_financiera_no_match["Número de Autorización"] = df_financiera_no_match_limpio["número de autorización"]
+                    df_financiera_no_match["Importe de Transacción"] = df_financiera_no_match_limpio["importe de transacción"]
 
-                    # Calcular estadísticas para las métricas
+                    # Calcular estadísticas reales para las métricas
                     total_matches = len(ids_con_match)
-                    sin_pago_local = len(df_casero_original) - total_matches
+                    sin_pago_local = len(ids_sin_match_filtrados)
                     sobrantes_financiera = len(df_financiera_no_match)
 
                     # Mostrar métricas en pantalla
                     st.divider()
                     metric_col1, metric_col2, metric_col3 = st.columns(3)
                     with metric_col1:
-                        st.metric(
-                            "Ventas Conciliadas (Agrupadas Arriba)",
-                            total_matches,
-                        )
+                        st.metric("Ventas Conciliadas (Correctas)", total_matches)
                     with metric_col2:
-                        st.metric("Ventas Local sin coincidencia", sin_pago_local)
+                        st.metric("Ventas Local sin coincidencia (Rojas)", sin_pago_local)
                     with metric_col3:
-                        st.metric(
-                            "Líneas Financiera sin match", sobrantes_financiera
-                        )
+                        st.metric("Líneas Financiera sin match", sobrantes_financiera)
                     st.divider()
 
-                    # 🎨 GENERAR EL EXCEL CON ESTILOS DE COLOR Y DOS PESTAÑAS
-                    output_reporte = io.BytesIO()
-                    with pd.ExcelWriter(
-                        output_reporte, engine="openpyxl"
-                    ) as writer:
-                        # Removemos la columna técnica 'coincide_match' antes de guardar la Pestaña 1 ordenada
-                        df_exportar_local = df_casero_ordenado.drop(
-                            columns=["coincide_match"]
+                    # 🎨 PROCESAMIENTO VISUAL EXACTO SOBRE EL EXCEL ORIGINAL DEL LOCAL
+                    excel_casero_subido.seek(0)
+                    wb_local = load_workbook(excel_casero_subido)
+                    ws_local = wb_local.active 
+
+                    # Definimos el color rojo pastel suave (Hex: FFCCCC)
+                    relleno_rojo = PatternFill(start_color="FFCCCC", end_color="FFCCCC", fill_type="solid")
+
+                    # Pintamos de rojo SOLO hasta la columna D (A, B, C, D) para las filas filtradas
+                    for fila_idx in ids_sin_match_filtrados:
+                        fila_excel = fila_idx + 2
+                        for col_idx in range(1, 5):  
+                            ws_local.cell(row=fila_excel, column=col_idx).fill = relleno_rojo
+
+                    # Guardamos el archivo local modificado en un buffer de memoria dedicado
+                    output_local = io.BytesIO()
+                    wb_local.save(output_local)
+                    datos_local_final = output_local.getvalue()
+
+                    # Guardamos los sobrantes de la financiera en su propio archivo Excel independiente
+                    output_financiera = io.BytesIO()
+                    with pd.ExcelWriter(output_financiera, engine="openpyxl") as writer_fin:
+                        df_financiera_no_match.to_excel(writer_fin, index=False, sheet_name="Pendientes_Financiera")
+                    datos_financiera_final = output_financiera.getvalue()
+
+                    st.success("¡Conciliación finalizada con éxito! Archivos listos para descargar.")
+                    
+                    # Botones de descarga organizados de forma limpia en dos columnas
+                    down_col1, down_col2 = st.columns(2)
+                    with down_col1:
+                        st.download_button(
+                            label="📥 Descargar tu Excel del Local (Con Alertas Rojas)",
+                            data=datos_local_final,
+                            file_name="local_conciliado_alertas.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         )
-                        df_exportar_local.to_excel(
-                            writer, index=False, sheet_name="Conciliacion_Local"
+                        st.caption("Conserva la estructura original de tu Local, forzando la comparación con la columna B.")
+
+                    with down_col2:
+                        st.download_button(
+                            label="📥 Descargar Sobrantes de la Financiera",
+                            data=datos_financiera_final,
+                            file_name="financiera_sin_local.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         )
-
-                        # PESTAÑA 2: Escribimos las transacciones sobrantes de la financiera
-                        df_financiera_no_match.to_excel(
-                            writer,
-                            index=False,
-                            sheet_name="No_Conciliados_Financiera",
-                        )
-
-                        # Accedemos a la primera hoja para aplicar los estilos de openpyxl
-                        workbook = writer.book
-                        worksheet = writer.sheets["Conciliacion_Local"]
-
-                        # Definimos el color verde claro (Hex: C6EFCE)
-                        relleno_verde = PatternFill(
-                            start_color="C6EFCE",
-                            end_color="C6EFCE",
-                            fill_type="solid",
-                        )
-
-                        # 🚀 CORRECCIÓN: Acceso seguro al valor booleano usando getattr() o índices de diccionario
-                        for idx, fila_data in enumerate(
-                            df_casero_ordenado.itertuples()
-                        ):
-                            if getattr(fila_data, "coincide_match"):
-                                fila_excel = (
-                                    idx + 2
-                                )  # Fila 1 es el encabezado del Excel
-                                for col_idx in range(
-                                    1, worksheet.max_column + 1
-                                ):
-                                    worksheet.cell(
-                                        row=fila_excel, column=col_idx
-                                    ).fill = relleno_verde
-
-                    datos_reporte = output_reporte.getvalue()
-
-                    st.success(
-                        "¡Conciliación finalizada! Archivo generado y ordenado con éxito."
-                    )
-                    st.download_button(
-                        label="📥 Descargar Reporte de Conciliación Completo",
-                        data=datos_reporte,
-                        file_name="reporte_conciliacion_final.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    )
+                        st.caption("Registros que vinieron en la liquidación pero que no tenías anotados en el Local.")
                 else:
                     st.error(
                         f"Error de formato:\n"
-                        f"- El Excel del Local debe contener las columnas: financiera, aut, importe.\n"
+                        f"- El Excel del Local debe contener las columnas obligatorias: 'aut' e 'importe'.\n"
                         f"- El Excel de la Financiera debe contener las columnas: producto, número de autorización, importe de transacción."
                     )
             except Exception as e:

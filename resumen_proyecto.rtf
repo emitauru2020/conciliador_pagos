@@ -1,95 +1,182 @@
 {\rtf1\ansi\ansicpg1252\cocoartf2709
 \cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Bold;\f1\fnil\fcharset0 HelveticaNeue;\f2\fmodern\fcharset0 Courier;
-\f3\fmodern\fcharset0 Courier-Bold;}
+\f3\fmodern\fcharset0 Courier-Bold;\f4\fnil\fcharset0 HelveticaNeue-Italic;}
 {\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
 {\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
 {\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
-{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}}
-{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}
+{\list\listtemplateid4\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid301\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid4}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}}
 \paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
 \deftab720
 \pard\pardeftab720\partightenfactor0
 
-\f0\b\fs32 \cf0 \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 1. Objetivo del Proyecto:
-\f1\b0 \
-Automatizar la conciliaci\'f3n de cobros de un local comercial mediante una aplicaci\'f3n web local con interfaz gr\'e1fica en Streamlit (Python). El sistema cruzar\'e1 las liquidaciones de un PDF con un Excel "casero" de ventas manuales utilizando el c\'f3digo de autorizaci\'f3n (
-\f2\fs28 Aut
-\f1\fs32 ) y el monto (
-\f2\fs28 Importe
-\f1\fs32 ) como claves \'fanicas de matcheo preciso.\
-
-\f0\b 2. Estado del Entorno T\'e9cnico:
-\f1\b0 \
-\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
-\ls1\ilvl0
-\f0\b \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 SO y Python:
-\f1\b0  macOS (Mac Intel/Apple Silicon) corriendo Python 3.14 (versi\'f3n experimental).\
-\ls1\ilvl0
-\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 Estructura y Git:
-\f1\b0  Proyecto inicializado en la carpeta 
-\f2\fs28 conciliador_pagos/
-\f1\fs32  con subcarpetas 
-\f2\fs28 src/
-\f1\fs32  y 
-\f2\fs28 datos/
-\f1\fs32 . Respaldado con \'e9xito en Git/GitHub con su archivo 
-\f2\fs28 .gitignore
-\f1\fs32  configurado para proteger la privacidad de los datos reales.\
-\ls1\ilvl0
-\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 Entorno Virtual y Librer\'edas:
-\f1\b0  Entorno 
-\f2\fs28 venv
-\f1\fs32  configurado y activo. Librer\'edas 
-\f2\fs28 pandas
-\f1\fs32 , 
-\f2\fs28 openpyxl
-\f1\fs32 , 
-\f2\fs28 streamlit
-\f1\fs32 y 
-\f3\b\fs28 pypdf
-\f1\b0\fs32  instaladas correctamente. (Se opt\'f3 por 
-\f2\fs28 pypdf
-\f1\fs32  para evitar conflictos de compilaci\'f3n de OpenSSL en Python 3.14).\
-\ls1\ilvl0
-\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 Acceso Directo:
-\f1\b0  Se cre\'f3 un script ejecutable 
-\f2\fs28 iniciar_app.command
-\f1\fs32  con permisos avanzados que, al hacerle doble clic desde el Finder de Mac, activa autom\'e1ticamente el entorno virtual, levanta el servidor local y abre la aplicaci\'f3n en el navegador.\
+\f0\b\fs40 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \uc0\u55357 \u56524  1. Objetivo General del Proyecto\
 \pard\pardeftab720\partightenfactor0
 
-\f0\b \cf0 3. Estado del C\'f3digo Actual (
-\f3\fs28 src/app.py
-\f0\fs32 ):
-\f1\b0 \
-La aplicaci\'f3n web ya cuenta con su dise\'f1o de pesta\'f1as funcionales:\
-\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
-\ls2\ilvl0
-\f0\b \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 Pesta\'f1a 1:
-\f1\b0  Cargador para el PDF de pagos (con c\'f3digo de extracci\'f3n base usando 
-\f2\fs28 pypdf
-\f1\fs32 ).\
-\ls2\ilvl0
-\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 Pesta\'f1a 2:
-\f1\b0  Cargador doble para comparar el Excel resultante del PDF con el Excel casero. Cuenta con la l\'f3gica de cruce de 
-\f2\fs28 pandas
-\f1\fs32  (Merge) lista para buscar coincidencias basadas en las 4 columnas definidas: 
-\f0\b Fecha
-\f1\b0 , 
-\f0\b Financiera
-\f1\b0 , 
-\f0\b Aut
-\f1\b0  e 
-\f0\b Importe
+\fs32 \cf0 Automatizar la conciliaci\'f3n de cobros
+\f1\b0  de un local comercial mediante una aplicaci\'f3n web interna (Streamlit). El sistema cruza las liquidaciones de tarjetas provistas por la Financiera contra el Excel manual ("casero") de ventas del Local, utilizando una clave de coincidencia de tres v\'edas: 
+\f0\b Marca, C\'f3digo de Autorizaci\'f3n (Aut) e Importe
 \f1\b0 .\
 \pard\pardeftab720\partightenfactor0
 
-\f0\b \cf0 4. Qu\'e9 falta para continuar ma\'f1ana:
-\f1\b0 \
-Ajustar las expresiones regulares en el procesamiento del PDF (Pesta\'f1a 1) para que Python sepa separar exactamente los datos reales de tu financiera en las columnas correspondientes cuando se suba el archivo.}
+\fs28 \cf0 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs40 \cf0 \uc0\u55357 \u56522  2. Estado Actual de la L\'f3gica y Filtros Especiales\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0\fs32 \cf0 El motor de conciliaci\'f3n (
+\f2\fs28 src/app.py
+\f1\fs32 ) fue optimizado a nivel de producci\'f3n para manejar excepciones complejas de las planillas reales del comercio:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls1\ilvl0
+\f0\b \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Protecci\'f3n de la Estructura del Local:
+\f1\b0  El archivo Excel del Local 
+\f0\b no se modifica en orden, ni en columnas, ni se le agregan textos
+\f1\b0 . Se descarga exactamente igual a como se subi\'f3.\
+\ls1\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Aislamiento de la Columna B:
+\f1\b0  Debido a que la palabra "Financiera" aparec\'eda repetida en m\'faltiples zonas del Excel del Local, el algoritmo fue configurado para ignorar los nombres de las columnas y leer 
+\f0\b estrictamente por posici\'f3n f\'edsica la columna B (\'edndice 
+\f3\fs28 1
+\f0\fs32  en Python)
+\f1\b0  para extraer las marcas de tarjetas.\
+\ls1\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Mapeo por Prefijo Inteligente:
+\f1\b0  Se implement\'f3 una l\'f3gica de coincidencia flexible. Si el texto en la Columna B empieza con 
+\f4\i "visa"
+\f1\i0 , 
+\f4\i "master"
+\f1\i0  u 
+\f4\i "oca"
+\f1\i0  (ej: 
+\f4\i "visa pos"
+\f1\i0 , 
+\f4\i "visa predusendse"
+\f1\i0 ), Python lo homologa autom\'e1ticamente a 
+\f2\fs28 VISA
+\f1\fs32 , 
+\f2\fs28 MASTER
+\f1\fs32  u 
+\f2\fs28 OCA
+\f1\fs32  para que machee perfectamente con la columna 
+\f2\fs28 Producto
+\f1\fs32  de la Financiera.\
+\ls1\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Pintado Delimitado (Alerta de Impagos):
+\f1\b0  Usando 
+\f2\fs28 openpyxl
+\f1\fs32 , el sistema detecta qu\'e9 ventas del Local no fueron liquidadas por la financiera y las 
+\f0\b pinta de rojo pastel (
+\f3\fs28 FFCCCC
+\f0\fs32 ) \'fanicamente desde la columna A hasta la columna D
+\f1\b0 , evitando alterar visualmente el resto de la fila de tu reporte.\
+\ls1\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Discriminaci\'f3n de Tarjetas Activas:
+\f1\b0  El sistema solo marca en rojo las faltas de la financiera que se est\'e1 evaluando en ese momento. Si subes la liquidaci\'f3n de Visa, no te pintar\'e1 en rojo las filas de Master u Oca.\
+\pard\pardeftab720\partightenfactor0
+
+\fs28 \cf0 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs40 \cf0 \uc0\u55357 \u57056 \u65039  3. Configuraci\'f3n del Entorno T\'e9cnico\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls2\ilvl0
+\fs32 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Infraestructura:
+\f1\b0  Proyecto alojado en la carpeta 
+\f2\fs28 conciliador_pagos/
+\f1\fs32  con el entorno virtual (
+\f2\fs28 venv
+\f1\fs32 ) activo y Git configurado con 
+\f2\fs28 .gitignore
+\f1\fs32  para proteger la privacidad de los datos reales del negocio.\
+\ls2\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Versi\'f3n de Python:
+\f1\b0  Corriendo sobre 
+\f0\b Python 3.14 (experimental)
+\f1\b0  en macOS (compatible con Intel y Apple Silicon).\
+\ls2\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Librer\'edas Clave:
+\f1\b0  
+\f2\fs28 pandas
+\f1\fs32  (para el cruce de datos tabulares), 
+\f2\fs28 openpyxl
+\f1\fs32  (para inyectar estilos en memoria sin romper formatos originales) y 
+\f2\fs28 streamlit
+\f1\fs32  (para la interfaz visual local).\
+\ls2\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Acceso Directo:
+\f1\b0  Script ejecutable 
+\f2\fs28 iniciar_app.command
+\f1\fs32  configurado con permisos avanzados para levantar el servidor local y abrir la ventana del navegador con solo hacer doble clic desde el Finder de Mac.\
+\pard\pardeftab720\partightenfactor0
+
+\fs28 \cf0 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs40 \cf0 \uc0\u55357 \u56510  4. Formatos de Archivos Esperados\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0\fs32 \cf0 Para que el sistema ejecute la conciliaci\'f3n de forma correcta, los archivos de entrada deben cumplir estrictamente con tener las siguientes columnas (no importa si est\'e1n en may\'fasculas, min\'fasculas o con espacios alrededor):\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls3\ilvl0
+\f0\b \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Excel de la Financiera:
+\f1\b0  Requiere las columnas 
+\f2\fs28 Producto
+\f1\fs32 , 
+\f2\fs28 N\'famero de autorizaci\'f3n
+\f1\fs32  e 
+\f2\fs28 Importe de transacci\'f3n
+\f1\fs32 .\
+\ls3\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Excel del Local:
+\f1\b0  Requiere que la columna 
+\f0\b B
+\f1\b0  contenga los nombres de la financiera, y adem\'e1s deben existir en cualquier posici\'f3n las columnas llamadas 
+\f2\fs28 Aut
+\f1\fs32  e 
+\f2\fs28 Importe
+\f1\fs32 .\
+\pard\pardeftab720\partightenfactor0
+
+\fs28 \cf0 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs40 \cf0 \uc0\u55357 \u56549  5. Entregables Finales de la App\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0\fs32 \cf0 Al presionar el bot\'f3n de ejecuci\'f3n, el sistema procesa todo en la memoria RAM del Mac (usando 
+\f2\fs28 io.BytesIO()
+\f1\fs32 ) sin generar basura en el disco duro, desplegando tres m\'e9tricas clave en pantalla y habilitando dos botones de descarga independientes:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls4\ilvl0
+\f2\fs28 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 local_conciliado_alertas.xlsx
+\f1\fs32 : Tu planilla original del local intacta, pero con las alertas rojas (columnas A-D) de lo que la financiera se olvid\'f3 de pagarte.\
+\ls4\ilvl0
+\f2\fs28 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 financiera_sin_local.xlsx
+\f1\fs32 : Una pesta\'f1a nueva con los registros que la financiera te liquid\'f3 pero que tu local olvid\'f3 anotar.\
+}
